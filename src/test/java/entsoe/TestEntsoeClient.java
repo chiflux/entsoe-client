@@ -161,16 +161,20 @@ class TestEntsoeClient {
 
     @Test
     void testGrossPrice() {
+        if (TOKEN==null) {
+            return; // skipTest
+        }
         System.out.println("Testing gross price calculation");
         EntsoeClient entsoeClient = new EntsoeClient(TOKEN);
         EntsoeDate entsoeDate = new EntsoeDate(NEW_YEAR_2023);
         TreeMap<EntsoeDate, BigDecimal> timeSeries = entsoeClient.getTimeSeries(entsoeDate, EntsoeResolution.PT60M);
         BigDecimal bigDecimal = timeSeries.get(EntsoeDate.fromENTSOEDateString("202301010800"));
-        Assertions.assertEquals(BigDecimal.valueOf(-0.11), bigDecimal);
+        BigDecimal transnetBWGrossPrice = Utils.getTransnetBWGrossPrice(bigDecimal);
+        Assertions.assertEquals(BigDecimal.valueOf(15.26), transnetBWGrossPrice);
     }
 
     @Test
-    void testRequestLimiter() throws InterruptedException {
+    void testRequestLimiter() {
         ApiRateLimiter apiRateLimiter = new ApiRateLimiter(
                 2, Duration.of(5, ChronoUnit.SECONDS),
                 Duration.of(500, ChronoUnit.MILLIS));
@@ -180,9 +184,15 @@ class TestEntsoeClient {
             System.out.println("wait for permit");
             apiRateLimiter.acquireWait();
             System.out.println("permit received " + counter.incrementAndGet());
-            Thread.sleep(100);
+            //Thread.sleep(100);
         }
         Assertions.assertTrue(counter.get()<12);
+    }
+
+    @Test
+    void testMisc() {
+        Assertions.assertEquals("    2", Utils.padIntegerWithSpaces(2, 5));
+        Assertions.assertEquals("00012", Utils.padIntegerWithZeros(12, 5));
     }
 
 }
