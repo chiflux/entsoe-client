@@ -5,8 +5,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 class TestEntsoeClient {
 
@@ -157,13 +161,28 @@ class TestEntsoeClient {
 
     @Test
     void testGrossPrice() {
-        EntsoeResolution resolution = EntsoeResolution.PT60M;
         System.out.println("Testing gross price calculation");
         EntsoeClient entsoeClient = new EntsoeClient(TOKEN);
         EntsoeDate entsoeDate = new EntsoeDate(NEW_YEAR_2023);
         TreeMap<EntsoeDate, BigDecimal> timeSeries = entsoeClient.getTimeSeries(entsoeDate, EntsoeResolution.PT60M);
         BigDecimal bigDecimal = timeSeries.get(EntsoeDate.fromENTSOEDateString("202301010800"));
         Assertions.assertEquals(BigDecimal.valueOf(-0.11), bigDecimal);
+    }
+
+    @Test
+    void testRequestLimiter() throws InterruptedException {
+        ApiRateLimiter apiRateLimiter = new ApiRateLimiter(
+                2, Duration.of(5, ChronoUnit.SECONDS),
+                Duration.of(500, ChronoUnit.MILLIS));
+        Instant start = Instant.now();
+        AtomicLong counter = new AtomicLong(0);
+        while(start.plus(Duration.of(20, ChronoUnit.SECONDS)).isAfter(Instant.now())) {
+            System.out.println("wait for permit");
+            apiRateLimiter.acquireWait();
+            System.out.println("permit received " + counter.incrementAndGet());
+            Thread.sleep(100);
+        }
+        Assertions.assertTrue(counter.get()<12);
     }
 
 }

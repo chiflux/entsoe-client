@@ -1,6 +1,5 @@
 package entsoe;
 
-import com.google.common.util.concurrent.RateLimiter;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -22,6 +21,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -47,7 +47,7 @@ public class EntsoeClient implements EntsoeDefines {
     private static final String in_Domain = "10Y1001A1001A82H"; // DE_LU (Germany)
     private static final String out_Domain = in_Domain; // must be the same as in_Domain
 
-    private final RateLimiter rateLimiter = RateLimiter.create(.2); // one permit per 5 seconds
+    private final ApiRateLimiter apiRateLimiter = new ApiRateLimiter(60, Duration.ofMinutes(1), Duration.ofSeconds(1)); // max 60 requests per minute
 
     private final String entsoeSecurityToken; // required to get access
 
@@ -181,7 +181,7 @@ public class EntsoeClient implements EntsoeDefines {
         if (cachedXMLValue != null && useCache) {
             return cachedXMLValue;
         }
-        rateLimiter.acquire();
+        apiRateLimiter.acquire();
         String requestURL = getRequestURL(new EntsoeDate(entsoeDate.utcDate()));
         LOGGER.log(Level.FINE, "GET " + requestURL);
 
