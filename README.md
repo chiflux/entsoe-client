@@ -1,6 +1,6 @@
 # entsoe-client
 
-This library provides a simplified API access via Java to spot price data of
+This library provides a simplified API access via Java to day ahead spot price data of
 the ENTSO-E Transparency Platform RESTful API.
 
 The spot price data contains the price information that is 

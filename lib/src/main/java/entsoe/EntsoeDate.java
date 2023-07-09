@@ -6,13 +6,30 @@ import java.time.temporal.ChronoField;
 
 import static entsoe.Utils.padIntegerWithZeros;
 
+/**
+ * Helper record to handle the special date format used in the ENTSO-E API.
+ * The record is comparable/sortable. It supports equals() and can thus be used without restriction as a key attribute in all Java Collection classes.
+ * @param utcDate the utc date
+ */
 public record EntsoeDate(ZonedDateTime utcDate) implements Comparable<EntsoeDate> {
+
     public static final ZoneId UTC_ZONE = ZoneId.of("UTC");
 
+    /**
+     * Creates a new object based on the provided utc time.
+     * @param utcDate the utc time
+     */
     public EntsoeDate(ZonedDateTime utcDate) {
         this.utcDate = utcDate.withSecond(0).withNano(0);
     }
 
+    /**
+     * Constrict an new object based on an existing object and a relative offset (position).
+     * @param entsoeDate The base date
+     * @param position the relative position to the date compared
+     * @param entsoeResolution the resolution to use. {@link EntsoeResolution#PT60M} supports only full hours, {@link EntsoeResolution#PT15M} supports 15-minute intervals
+     * @return the new date
+     */
     public static EntsoeDate fromENTSOEDate(EntsoeDate entsoeDate, int position, EntsoeResolution entsoeResolution) {
         int plusHours = position;
         int plusMinutes = 0;
@@ -23,6 +40,11 @@ public record EntsoeDate(ZonedDateTime utcDate) implements Comparable<EntsoeDate
         return new EntsoeDate(entsoeDate.utcDate.plusHours(plusHours).plusMinutes(plusMinutes));
     }
 
+    /**
+     * Create a new object of the String representation of an ENTSO-E date.
+     * @param entsoeFormat A date like 202301010123 what means Jan 1st, 2023 at 1:23am
+     * @return new object
+     */
     public static EntsoeDate fromENTSOEDateString(String entsoeFormat) {
         int year = Integer.parseInt(entsoeFormat.substring(0, 4));
         int month = Integer.parseInt(entsoeFormat.substring(4, 6));
@@ -40,6 +62,10 @@ public record EntsoeDate(ZonedDateTime utcDate) implements Comparable<EntsoeDate
         return new EntsoeDate(utc);
     }
 
+    /**
+     * Date-only ENTSO-E String representation of the utc date object
+     * @return Date-only ENTSO-E String representation of the utc date object
+     */
     public String getEntsoeDate() {
         StringBuilder res = new StringBuilder();
         int year = utcDate.get(ChronoField.YEAR);
@@ -49,6 +75,10 @@ public record EntsoeDate(ZonedDateTime utcDate) implements Comparable<EntsoeDate
         return res.toString();
     }
 
+    /**
+     * Date-time ENTSO-E String representation of the utc date object
+     * @return Date-time ENTSO-E String representation of the utc date object
+     */
     public String getEntsoeDateTime() {
         StringBuilder res = new StringBuilder(getEntsoeDate());
         int hour = utcDate.get(ChronoField.HOUR_OF_DAY);

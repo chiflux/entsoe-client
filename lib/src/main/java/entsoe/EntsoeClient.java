@@ -33,9 +33,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class EntsoeClient implements Defines {
+/**
+ * Access the ENTSO-E Transparency Platform.
+ * To be able to use the library, an API TOKEN is required. See README.md
+ * Please note that some constants make only sense for users in Germany.
+ */
+public class EntsoeClient implements EntsoeDefines {
 
     private static final Logger LOGGER = Logger.getLogger(EntsoeClient.class.getName());
+
     private static final String apiUrl = "https://web-api.tp.entsoe.eu/api"; // The URL of the ENTSOE API
     private static final String documentType = "A44"; // The day ahead prices document
     private static final String in_Domain = "10Y1001A1001A82H"; // DE_LU (Germany)
@@ -43,7 +49,7 @@ public class EntsoeClient implements Defines {
 
     private final RateLimiter rateLimiter = RateLimiter.create(.2); // one permit per 5 seconds
 
-    private String entsoeSecurityToken;
+    private final String entsoeSecurityToken; // required to get access
 
     public EntsoeClient(String entsoeSecurityToken) {
         if (entsoeSecurityToken==null) {
@@ -63,6 +69,14 @@ public class EntsoeClient implements Defines {
         this.entsoeSecurityToken = property;
     }
 
+    /**
+     * Returns a TimeSeries that is truncated at the specified cutOffDate.
+     * See {@link #getTimeSeries(EntsoeDate, EntsoeResolution)}
+     * @param entsoeDate The date to request the day ahead spot price data for
+     * @param entsoeResolution The resolution of the data. For spot price plans in Germany {@link EntsoeResolution#PT60M} must be used.
+     * @param cutOffDate The cutoff date. Data before this date will be removed.
+     * @return A map that correlates timeslots and day ahead spot prices
+     */
     public TreeMap<EntsoeDate, BigDecimal> getTimeSeries(EntsoeDate entsoeDate, EntsoeResolution entsoeResolution, ZonedDateTime cutOffDate) {
         TreeMap<EntsoeDate, BigDecimal> timeSeries = getTimeSeries(entsoeDate, entsoeResolution);
         if (cutOffDate != null) {
@@ -76,6 +90,12 @@ public class EntsoeClient implements Defines {
         return timeSeries;
     }
 
+    /**
+     * Returns a TimeSeries that is truncated at the specified cutOffDate.
+     * @param entsoeDate The date to request the day ahead spot price data for
+     * @param entsoeResolution The resolution of the data. For spot price plans in Germany {@link EntsoeResolution#PT60M} must be used.
+     * @return A map that correlates timeslots and day ahead spot prices
+     */
     public TreeMap<EntsoeDate, BigDecimal> getTimeSeries(EntsoeDate entsoeDate, EntsoeResolution entsoeResolution) {
         TreeMap<EntsoeDate, BigDecimal> res = new TreeMap<>();
         String spotpriceDataRaw = getSpotpriceDataRaw(entsoeDate);
@@ -145,6 +165,11 @@ public class EntsoeClient implements Defines {
 
     private final AtomicReference<String> XML_CACHE = new AtomicReference<>();
 
+    /**
+     * Returns the raw spot price data as XML String.
+     * @param entsoeDateIn The date to request the day ahead spot price data for
+     * @return the raw XML response of the ENTSO-E API
+     */
     public String getSpotpriceDataRaw(EntsoeDate entsoeDateIn) {
         ZonedDateTime zonedDateTime = entsoeDateIn.utcDate().
                 with(ChronoField.MINUTE_OF_HOUR, 0).
@@ -175,6 +200,11 @@ public class EntsoeClient implements Defines {
         return null;
     }
 
+    /**
+     * Assemble the request URL for a specific date
+     * @param entsoeDate The date to request the day ahead spot price data for
+     * @return the URL to call
+     */
     public String getRequestURL(EntsoeDate entsoeDate) {
         LOGGER.fine("ENTSOE securityToken=" + entsoeSecurityToken);
         ZonedDateTime utcDate = entsoeDate.utcDate();

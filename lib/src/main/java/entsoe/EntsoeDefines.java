@@ -1,6 +1,6 @@
 package entsoe;
 
-public interface Defines {
+public interface EntsoeDefines {
 
     String ENTSOE_SECURITY_TOKEN = "ENTSOE_SECURITY_TOKEN";
 

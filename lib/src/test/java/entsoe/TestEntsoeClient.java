@@ -17,9 +17,9 @@ class TestEntsoeClient {
 
     @BeforeAll
     static void init() {
-        TOKEN = System.getProperty(Defines.ENTSOE_SECURITY_TOKEN);
+        TOKEN = System.getProperty(EntsoeDefines.ENTSOE_SECURITY_TOKEN);
         if (TOKEN==null) {
-            TOKEN = System.getenv(Defines.ENTSOE_SECURITY_TOKEN);
+            TOKEN = System.getenv(EntsoeDefines.ENTSOE_SECURITY_TOKEN);
         }
     }
 
@@ -50,7 +50,7 @@ class TestEntsoeClient {
         } catch (IllegalStateException | IllegalArgumentException e) {
             System.out.println("Exception is expected (1)");
         }
-        if (System.getProperty(Defines.ENTSOE_SECURITY_TOKEN)==null && System.getenv(Defines.ENTSOE_SECURITY_TOKEN)==null) {
+        if (System.getProperty(EntsoeDefines.ENTSOE_SECURITY_TOKEN)==null && System.getenv(EntsoeDefines.ENTSOE_SECURITY_TOKEN)==null) {
             try {
                 new EntsoeClient();
                 throw new RuntimeException("expected exception");
@@ -153,6 +153,17 @@ class TestEntsoeClient {
 
         Assertions.assertTrue(timeSeries2.containsKey(entsoeDate1));
         Assertions.assertTrue(timeSeries2.containsKey(EntsoeDate.fromENTSOEDateString("202301012245")));
+    }
+
+    @Test
+    void testGrossPrice() {
+        EntsoeResolution resolution = EntsoeResolution.PT60M;
+        System.out.println("Testing gross price calculation");
+        EntsoeClient entsoeClient = new EntsoeClient(TOKEN);
+        EntsoeDate entsoeDate = new EntsoeDate(NEW_YEAR_2023);
+        TreeMap<EntsoeDate, BigDecimal> timeSeries = entsoeClient.getTimeSeries(entsoeDate, EntsoeResolution.PT60M);
+        BigDecimal bigDecimal = timeSeries.get(EntsoeDate.fromENTSOEDateString("202301010800"));
+        Assertions.assertEquals(BigDecimal.valueOf(-0.11), bigDecimal);
     }
 
 }
