@@ -63,8 +63,8 @@ public class EntsoeClient implements Defines {
         this.entsoeSecurityToken = property;
     }
 
-    public TreeMap<EntsoeDate, BigDecimal> getTimeSeries(EntsoeDate entsoeDate, ZonedDateTime cutOffDate) {
-        TreeMap<EntsoeDate, BigDecimal> timeSeries = getTimeSeries(entsoeDate);
+    public TreeMap<EntsoeDate, BigDecimal> getTimeSeries(EntsoeDate entsoeDate, EntsoeResolution entsoeResolution, ZonedDateTime cutOffDate) {
+        TreeMap<EntsoeDate, BigDecimal> timeSeries = getTimeSeries(entsoeDate, entsoeResolution);
         if (cutOffDate != null) {
             TreeSet<EntsoeDate> entsoeDates = new TreeSet<>(timeSeries.keySet());
             for (EntsoeDate date : entsoeDates) {
@@ -76,7 +76,7 @@ public class EntsoeClient implements Defines {
         return timeSeries;
     }
 
-    public TreeMap<EntsoeDate, BigDecimal> getTimeSeries(EntsoeDate entsoeDate) {
+    public TreeMap<EntsoeDate, BigDecimal> getTimeSeries(EntsoeDate entsoeDate, EntsoeResolution entsoeResolution) {
         TreeMap<EntsoeDate, BigDecimal> res = new TreeMap<>();
         String spotpriceDataRaw = getSpotpriceDataRaw(entsoeDate);
         if (spotpriceDataRaw == null) {
@@ -94,7 +94,7 @@ public class EntsoeClient implements Defines {
             for (int i = 0; i < length; i++) {
                 Node resoultionNode = nodeList.item(i);
                 String resolution = resoultionNode.getTextContent();
-                if (resolution.equals("PT60M")) {
+                if (resolution.equals(entsoeResolution.name())) {
                     nodes.add(resoultionNode.getParentNode()); // Period
                 }
             }
@@ -130,7 +130,7 @@ public class EntsoeClient implements Defines {
                         if (position != null && price!=null) {
                             ZonedDateTime zonedDateTime = ZonedDateTime.parse(start);
                             EntsoeDate entsoeStartDate = new EntsoeDate(zonedDateTime);
-                            EntsoeDate priceDate = EntsoeDate.fromENTSOEDate(entsoeStartDate, position - 1);
+                            EntsoeDate priceDate = EntsoeDate.fromENTSOEDate(entsoeStartDate, position - 1, entsoeResolution);
                             LOGGER.finer("price mapping " + priceDate + "=" + price);
                             res.put(priceDate, price.setScale(2, RoundingMode.HALF_UP));
                         }

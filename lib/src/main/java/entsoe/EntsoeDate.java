@@ -1,7 +1,5 @@
 package entsoe;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
@@ -9,29 +7,36 @@ import java.time.temporal.ChronoField;
 import static entsoe.Utils.padIntegerWithZeros;
 
 public record EntsoeDate(ZonedDateTime utcDate) implements Comparable<EntsoeDate> {
+    public static final ZoneId UTC_ZONE = ZoneId.of("UTC");
 
     public EntsoeDate(ZonedDateTime utcDate) {
-        this.utcDate = utcDate.with(ChronoField.NANO_OF_SECOND, 0);
+        this.utcDate = utcDate.withSecond(0).withNano(0);
     }
 
-    public static EntsoeDate fromENTSOEDate(EntsoeDate entsoeDate, int position) {
-        return new EntsoeDate(entsoeDate.utcDate.plusHours(position));
+    public static EntsoeDate fromENTSOEDate(EntsoeDate entsoeDate, int position, EntsoeResolution entsoeResolution) {
+        int plusHours = position;
+        int plusMinutes = 0;
+        if (entsoeResolution==EntsoeResolution.PT15M) {
+            plusHours = position / 4;
+            plusMinutes = (position % 4) * 15;
+        }
+        return new EntsoeDate(entsoeDate.utcDate.plusHours(plusHours).plusMinutes(plusMinutes));
     }
 
     public static EntsoeDate fromENTSOEDateString(String entsoeFormat) {
         int year = Integer.parseInt(entsoeFormat.substring(0, 4));
         int month = Integer.parseInt(entsoeFormat.substring(4, 6));
         int day = Integer.parseInt(entsoeFormat.substring(6, 8));
-        LocalDate localDate = LocalDate.of(year, month, day);
-        LocalTime localTime;
+        int hour;
+        int minute;
         if (entsoeFormat.length() > 8) {
-            int hour = Integer.parseInt(entsoeFormat.substring(8, 10));
-            int minute = Integer.parseInt(entsoeFormat.substring(10, 12));
-            localTime = LocalTime.of(hour, minute);
+            hour = Integer.parseInt(entsoeFormat.substring(8, 10));
+            minute = Integer.parseInt(entsoeFormat.substring(10, 12));
         } else {
-            localTime = LocalTime.of(0, 0);
+            hour = 0;
+            minute = 0;
         }
-        ZonedDateTime utc = ZonedDateTime.of(localDate, localTime, ZoneId.of("UTC"));
+        ZonedDateTime utc = ZonedDateTime.of(year, month, day, hour, minute, 0, 0, UTC_ZONE);
         return new EntsoeDate(utc);
     }
 
@@ -59,7 +64,7 @@ public record EntsoeDate(ZonedDateTime utcDate) implements Comparable<EntsoeDate
 
     @Override
     public int compareTo(EntsoeDate o) {
-        return this.utcDate.compareTo(o.utcDate);
+        return this.utcDate.withFixedOffsetZone().compareTo(o.utcDate.withFixedOffsetZone());
     }
 
 }
