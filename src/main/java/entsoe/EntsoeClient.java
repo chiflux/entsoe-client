@@ -51,6 +51,10 @@ public class EntsoeClient implements EntsoeDefines {
 
     private final String entsoeSecurityToken; // required to get access
 
+    /**
+     * Explicit constructor that takes the ENTSOE_SECURITY_TOKEN as parameter.
+     * @param entsoeSecurityToken The ENTSOE_SECURITY_TOKEN as parameter - must not be null
+     */
     public EntsoeClient(String entsoeSecurityToken) {
         if (entsoeSecurityToken==null) {
             throw new IllegalArgumentException("entsoeSecurityToken must not be null");
@@ -58,6 +62,10 @@ public class EntsoeClient implements EntsoeDefines {
         this.entsoeSecurityToken = entsoeSecurityToken;
     }
 
+    /**
+     * Default constructor which reads ENTSOE_SECURITY_TOKEN from Java Properties or ENV Variable.
+     * A Java Property has precedence over an ENV variable.
+     */
     public EntsoeClient() {
         String property = System.getProperty(ENTSOE_SECURITY_TOKEN);
         if (property==null) {

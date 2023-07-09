@@ -3,6 +3,9 @@ package entsoe;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+/**
+ * Utility functions.
+ */
 public class Utils {
 
     private static final double GERMAN_TAX = 1.19d;

@@ -13,6 +13,9 @@ import static entsoe.Utils.padIntegerWithZeros;
  */
 public record EntsoeDate(ZonedDateTime utcDate) implements Comparable<EntsoeDate> {
 
+    /**
+     * The default ZoneId
+     */
     public static final ZoneId UTC_ZONE = ZoneId.of("UTC");
 
     /**
