@@ -26,6 +26,16 @@ Windows
 
     .\gradlew.bat build
 
+## Usage
+
+### Maven 
+
+    <dependency>
+        <groupId>de.chiflux</groupId>
+        <artifactId>entsoe-client</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+
 ## Examples
 
 ### Get spot prices for the next day
