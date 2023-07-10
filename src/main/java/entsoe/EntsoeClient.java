@@ -1,9 +1,5 @@
 package entsoe;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -20,6 +16,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -193,16 +193,19 @@ public class EntsoeClient implements EntsoeDefines {
         String requestURL = getRequestURL(new EntsoeDate(entsoeDate.utcDate()));
         LOGGER.log(Level.FINE, "GET " + requestURL);
 
-        Request request = new Request.Builder().url(requestURL).build();
-        OkHttpClient client = new OkHttpClient();
-        try (Response response = client.newCall(request).execute()) {
-            ResponseBody body = response.body();
-            if (body != null) {
-                String xmlPayload = body.string();
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(requestURL))
+                .build();
+
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response!=null) {
+                String xmlPayload = response.body();
                 XML_CACHE.set(xmlPayload);
                 return xmlPayload;
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
         return null;
