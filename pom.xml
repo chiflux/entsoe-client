@@ -4,7 +4,7 @@
   <groupId>de.chiflux</groupId>
   <artifactId>entsoe-client</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.8</version>
+  <version>1.0.9</version>
   <name>${project.groupId}:${project.artifactId}</name>
   <description>Java Library for accessing Day-ahead Prices for Germany on the ENTSO-E Transparency Platform</description>
   <url>https://github.com/chiflux/entsoe-client</url>

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -242,7 +243,7 @@ class TestEntsoeClient {
     }
 
     @Test
-    void testGetTimeSeriesEx() {
+    void testGetTimeSeriesEx1() {
         if (TOKEN == null || TOKEN.isBlank()) {
             return;
         }
@@ -251,6 +252,20 @@ class TestEntsoeClient {
         var timeSeries1 = entsoeClient.getTimeSeriesEx(entsoeDate1, EntsoeResolution.PT60M);
         System.out.println(timeSeries1);
         Assertions.assertTrue(timeSeries1.size()>25);
+    }
+
+    @Test
+    void testGetTimeSeriesEx2() {
+        if (TOKEN == null || TOKEN.isBlank()) {
+            return;
+        }
+        EntsoeDate entsoeDate1 = EntsoeDate.fromENTSOEDateString("202310290000");
+        EntsoeClient entsoeClient = new EntsoeClient(TOKEN);
+        ZonedDateTime now = ZonedDateTime.of(2023, 10, 29, 20, 0, 0, 0, ZoneId.of("UTC"));
+        var timeSeries1 = entsoeClient.getTimeSeriesEx(entsoeDate1, EntsoeResolution.PT60M, now);
+        System.out.println(timeSeries1);
+        System.out.println(timeSeries1.size());
+        Assertions.assertEquals(28, timeSeries1.size());
     }
 
 }

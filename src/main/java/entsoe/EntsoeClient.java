@@ -22,7 +22,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -186,15 +185,14 @@ public class EntsoeClient implements EntsoeDefines {
      **/
     public TreeMap<EntsoeDate, BigDecimal> getTimeSeriesEx(EntsoeDate entsoeDate, EntsoeResolution entsoeResolution) {
         var timeSeriesInternal = getTimeSeriesInternal(entsoeDate, entsoeResolution);
-        if (ZonedDateTime.now(ZoneId.systemDefault()).getHour() >= 12) {
-            var tomorrow = LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault()).plusDays(1);
-            EntsoeDate entsoeDate2 = new EntsoeDate(tomorrow);
-            TreeMap<EntsoeDate, BigDecimal> timeSeries2 = getTimeSeries(entsoeDate2, EntsoeResolution.PT60M);
-            if (!timeSeries2.isEmpty()) {
-                for (EntsoeDate ed : timeSeries2.keySet()) {
-                    if (!timeSeriesInternal.containsKey(ed)) {
-                        timeSeriesInternal.put(ed, timeSeries2.get(ed));
-                    }
+        var today = ZonedDateTime.now(ZoneId.of("UTC")).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        var tomorrow = today.plusDays(1);
+        EntsoeDate entsoeDate2 = new EntsoeDate(tomorrow);
+        TreeMap<EntsoeDate, BigDecimal> timeSeries2 = getTimeSeries(entsoeDate2, EntsoeResolution.PT60M);
+        if (!timeSeries2.isEmpty()) {
+            for (EntsoeDate ed : timeSeries2.keySet()) {
+                if (!timeSeriesInternal.containsKey(ed)) {
+                    timeSeriesInternal.put(ed, timeSeries2.get(ed));
                 }
             }
         }
