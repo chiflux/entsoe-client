@@ -33,7 +33,7 @@ Windows
     <dependency>
         <groupId>de.chiflux</groupId>
         <artifactId>entsoe-client</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.7</version>
     </dependency>
 
 ## Examples
