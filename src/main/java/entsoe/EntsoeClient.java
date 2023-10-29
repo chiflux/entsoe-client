@@ -86,6 +86,11 @@ public class EntsoeClient implements EntsoeDefines {
      */
     public TreeMap<EntsoeDate, BigDecimal> getTimeSeries(EntsoeDate entsoeDate, EntsoeResolution entsoeResolution, ZonedDateTime cutOffDate) {
         TreeMap<EntsoeDate, BigDecimal> timeSeries = getTimeSeries(entsoeDate, entsoeResolution);
+        cutTimeSeries(cutOffDate, timeSeries);
+        return timeSeries;
+    }
+
+    private void cutTimeSeries(ZonedDateTime cutOffDate, TreeMap<EntsoeDate, BigDecimal> timeSeries) {
         if (cutOffDate != null) {
             TreeSet<EntsoeDate> entsoeDates = new TreeSet<>(timeSeries.keySet());
             for (EntsoeDate date : entsoeDates) {
@@ -94,7 +99,6 @@ public class EntsoeClient implements EntsoeDefines {
                 }
             }
         }
-        return timeSeries;
     }
 
     private TreeMap<EntsoeDate, BigDecimal> getTimeSeriesInternal(EntsoeDate entsoeDate, EntsoeResolution entsoeResolution) {
@@ -195,6 +199,19 @@ public class EntsoeClient implements EntsoeDefines {
             }
         }
         return timeSeriesInternal;
+    }
+
+    /**
+     * Returns a TimeSeries of the specified date and if available, also of the following day
+     * @param entsoeDate The date to request the day ahead spot price data for
+     * @param entsoeResolution The resolution of the data. For spot price plans in Germany {@link EntsoeResolution#PT60M} must be used.
+     * @param cutOffDate The cutoff date. Data before this date will be removed.
+     * @return A map that correlates timeslots and day ahead spot prices for the specified date and if available, also the following day
+     **/
+    public TreeMap<EntsoeDate, BigDecimal> getTimeSeriesEx(EntsoeDate entsoeDate, EntsoeResolution entsoeResolution, ZonedDateTime cutOffDate) {
+        TreeMap<EntsoeDate, BigDecimal> timeSeries = getTimeSeriesEx(entsoeDate, entsoeResolution);
+        cutTimeSeries(cutOffDate, timeSeries);
+        return timeSeries;
     }
 
     /**
